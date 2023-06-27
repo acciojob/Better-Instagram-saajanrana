@@ -1,45 +1,54 @@
-//your code here
-const images = document.querySelectorAll('.image');
+const draggableElements = document.querySelectorAll('.image');
 
-let currentImage = null;
-
-// Add event listeners for drag start and drag end
-images.forEach(image => {
-    image.addEventListener('dragstart', dragStart);
-    image.addEventListener('dragend', dragEnd);
-});
-
-// Add event listeners for drag over and drop
-images.forEach(image => {
-    image.addEventListener('dragover', dragOver);
-    image.addEventListener('drop', drop);
-});
+// Initialize variables
+let dragStartIndex;
+let draggedElement;
 
 // Function to handle drag start event
-function dragStart(e) {
-    currentImage = e.target;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', currentImage.innerHTML);
-    currentImage.classList.add('selected');
-}
-
-// Function to handle drag end event
-function dragEnd() {
-    currentImage.classList.remove('selected');
+function dragStart(event) {
+  dragStartIndex = Number(this.dataset.index);
+  draggedElement = this;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/html', this.innerHTML);
+  this.classList.add('selected');
 }
 
 // Function to handle drag over event
-function dragOver(e) {
-    e.preventDefault();
+function dragOver(event) {
+  event.preventDefault();
+}
+
+// Function to handle drag enter event
+function dragEnter(event) {
+  event.preventDefault();
+  this.classList.add('selected');
+}
+
+// Function to handle drag leave event
+function dragLeave() {
+  this.classList.remove('selected');
 }
 
 // Function to handle drop event
-function drop(e) {
-    e.preventDefault();
+function drop(event) {
+  const dropIndex = Number(this.dataset.index);
+  this.classList.remove('selected');
 
-    // Swap the image content
-    const draggedData = e.dataTransfer.getData('text/html');
-    const droppedData = e.target.innerHTML;
-    e.target.innerHTML = draggedData;
-    currentImage.innerHTML = droppedData;
+  // Swap the content (images) of the dragged and dropped elements
+  const temp = draggedElement.innerHTML;
+  draggedElement.innerHTML = this.innerHTML;
+  this.innerHTML = temp;
+
+  // Swap the data-index values of the dragged and dropped elements
+  draggedElement.dataset.index = dropIndex;
+  this.dataset.index = dragStartIndex;
 }
+
+// Add event listeners to draggable elements
+draggableElements.forEach((element) => {
+  element.addEventListener('dragstart', dragStart);
+  element.addEventListener('dragover', dragOver);
+  element.addEventListener('dragenter', dragEnter);
+  element.addEventListener('dragleave', dragLeave);
+  element.addEventListener('drop', drop);
+});
