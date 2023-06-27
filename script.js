@@ -1,54 +1,46 @@
-const draggableElements = document.querySelectorAll('.image');
+let dragindex = 0;
+let dropindex = 0;
+let clone = "";
 
-// Initialize variables
-let dragStartIndex;
-let draggedElement;
+const images = document.querySelectorAll(".image");
 
-// Function to handle drag start event
-function dragStart(event) {
-  dragStartIndex = Number(this.dataset.index);
-  draggedElement = this;
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/html', this.innerHTML);
-  this.classList.add('selected');
+function drag(e) {
+  e.dataTransfer.setData("text", e.target.id);
 }
 
-// Function to handle drag over event
-function dragOver(event) {
-  event.preventDefault();
+function allowDrop(e) {
+  e.preventDefault();
 }
 
-// Function to handle drag enter event
-function dragEnter(event) {
-  event.preventDefault();
-  this.classList.add('selected');
+function drop(e) {
+  clone = e.target.cloneNode(true);
+  let data = e.dataTransfer.getData("text");
+  let nodelist = document.getElementById("parent").childNodes;
+  console.log(data, e.target.id);
+  for (let i = 0; i < nodelist.length; i++) {
+    if (nodelist[i].id == data) {
+      dragindex = i;
+    }
+  }
+
+  dragdrop(clone);
+
+  document
+    .getElementById("parent")
+    .replaceChild(document.getElementById(data), e.target);
+
+  document
+    .getElementById("parent")
+    .insertBefore(
+      clone,
+      document.getElementById("parent").childNodes[dragindex]
+    );
 }
 
-// Function to handle drag leave event
-function dragLeave() {
-  this.classList.remove('selected');
-}
+const dragdrop = (image) => {
+  image.ondragstart = drag;
+  image.ondragover = allowDrop;
+  image.ondrop = drop;
+};
 
-// Function to handle drop event
-function drop(event) {
-  const dropIndex = Number(this.dataset.index);
-  this.classList.remove('selected');
-
-  // Swap the content (images) of the dragged and dropped elements
-  const temp = draggedElement.innerHTML;
-  draggedElement.innerHTML = this.innerHTML;
-  this.innerHTML = temp;
-
-  // Swap the data-index values of the dragged and dropped elements
-  draggedElement.dataset.index = dropIndex;
-  this.dataset.index = dragStartIndex;
-}
-
-// Add event listeners to draggable elements
-draggableElements.forEach((element) => {
-  element.addEventListener('dragstart', dragStart);
-  element.addEventListener('dragover', dragOver);
-  element.addEventListener('dragenter', dragEnter);
-  element.addEventListener('dragleave', dragLeave);
-  element.addEventListener('drop', drop);
-});
+images.forEach(dragdrop);
