@@ -1,43 +1,46 @@
-let images = document.querySelectorAll(".image");
+let dragindex = 0;
+let dropindex = 0;
+let clone = "";
 
-// console.log(images)
+const images = document.querySelectorAll(".image");
 
-let selectedDiv=null;
-
-function handleDragStart(){
-  selectedDiv=this;
-  this.classList.add("selected");
+function drag(e) {
+  e.dataTransfer.setData("text", e.target.id);
 }
 
-function handleDragOver(event){
-    event.preventDefault();
-    // console.log(event);
+function allowDrop(e) {
+  e.preventDefault();
 }
 
-function handleDrop(e) {
-  if (selectedDiv !== this) {
-    let temp = window.getComputedStyle(selectedDiv).backgroundImage;
-    selectedDiv.style.backgroundImage = window.getComputedStyle(this).backgroundImage;
-    this.style.backgroundImage = temp;
-
-    // Not Working
-    // let temp = selectedDiv.style.cssText;
-    // selectedDiv.style.cssText=this.style.cssText;
-    // this.style.cssText= temp;
+function drop(e) {
+  clone = e.target.cloneNode(true);
+  let data = e.dataTransfer.getData("text");
+  let nodelist = document.getElementById("parent").childNodes;
+  console.log(data, e.target.id);
+  for (let i = 0; i < nodelist.length; i++) {
+    if (nodelist[i].id == data) {
+      dragindex = i;
+    }
   }
-  selectedDiv.classList.remove('selected');
-  selectedDiv = null;
+
+  dragdrop(clone);
+
+  document
+    .getElementById("parent")
+    .replaceChild(document.getElementById(data), e.target);
+
+  document
+    .getElementById("parent")
+    .insertBefore(
+      clone,
+      document.getElementById("parent").childNodes[dragindex]
+    );
 }
 
+const dragdrop = (image) => {
+  image.ondragstart = drag;
+  image.ondragover = allowDrop;
+  image.ondrop = drop;
+};
 
-
-function doDrag(){
-  images.forEach((item)=>{
-    item.addEventListener('dragstart',handleDragStart)
-    item.addEventListener('dragover',handleDragOver)
-    item.addEventListener('drop',handleDrop)
-  })
-}
-
-
-doDrag()
+images.forEach(dragdrop);
