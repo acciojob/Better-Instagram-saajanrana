@@ -1,46 +1,37 @@
-let dragindex = 0;
-let dropindex = 0;
-let clone = "";
-
+const parent = document.getElementById("parent");
 const images = document.querySelectorAll(".image");
 
-function drag(e) {
-  e.dataTransfer.setData("text", e.target.id);
-}
+let selected = null;
 
-function allowDrop(e) {
-  e.preventDefault();
-}
+// Event listener for the drag start event
+parent.addEventListener("dragstart", (event) => {
+  selected = event.target;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/html", selected.outerHTML);
+});
 
-function drop(e) {
-  clone = e.target.cloneNode(true);
-  let data = e.dataTransfer.getData("text");
-  let nodelist = document.getElementById("parent").childNodes;
-  console.log(data, e.target.id);
-  for (let i = 0; i < nodelist.length; i++) {
-    if (nodelist[i].id == data) {
-      dragindex = i;
-    }
+// Event listener for the drag over event
+parent.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  if (event.target.classList.contains("image")) {
+    event.target.classList.add("selected");
   }
+});
 
-  dragdrop(clone);
+// Event listener for the drag leave event
+parent.addEventListener("dragleave", (event) => {
+  event.preventDefault();
+  if (event.target.classList.contains("image")) {
+    event.target.classList.remove("selected");
+  }
+});
 
-  document
-    .getElementById("parent")
-    .replaceChild(document.getElementById(data), e.target);
-
-  document
-    .getElementById("parent")
-    .insertBefore(
-      clone,
-      document.getElementById("parent").childNodes[dragindex]
-    );
-}
-
-const dragdrop = (image) => {
-  image.ondragstart = drag;
-  image.ondragover = allowDrop;
-  image.ondrop = drop;
-};
-
-images.forEach(dragdrop);
+// Event listener for the drop event
+parent.addEventListener("drop", (event) => {
+  event.preventDefault();
+  if (event.target.classList.contains("image")) {
+    event.target.insertAdjacentHTML("beforebegin", selected.outerHTML);
+    selected.remove();
+    event.target.classList.remove("selected");
+  }
+});
