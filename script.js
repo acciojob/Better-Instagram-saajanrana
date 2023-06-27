@@ -1,37 +1,43 @@
-const parent = document.getElementById("parent");
-const images = document.querySelectorAll(".image");
+let images = document.querySelectorAll(".image");
 
-let selected = null;
+// console.log(images)
 
-// Event listener for the drag start event
-parent.addEventListener("dragstart", (event) => {
-  selected = event.target;
-  event.dataTransfer.effectAllowed = "move";
-  event.dataTransfer.setData("text/html", selected.outerHTML);
-});
+let selectedDiv=null;
 
-// Event listener for the drag over event
-parent.addEventListener("dragover", (event) => {
-  event.preventDefault();
-  if (event.target.classList.contains("image")) {
-    event.target.classList.add("selected");
+function handleDragStart(){
+  selectedDiv=this;
+  this.classList.add("selected");
+}
+
+function handleDragOver(event){
+    event.preventDefault();
+    // console.log(event);
+}
+
+function handleDrop(e) {
+  if (selectedDiv !== this) {
+    let temp = window.getComputedStyle(selectedDiv).backgroundImage;
+    selectedDiv.style.backgroundImage = window.getComputedStyle(this).backgroundImage;
+    this.style.backgroundImage = temp;
+
+    // Not Working
+    // let temp = selectedDiv.style.cssText;
+    // selectedDiv.style.cssText=this.style.cssText;
+    // this.style.cssText= temp;
   }
-});
+  selectedDiv.classList.remove('selected');
+  selectedDiv = null;
+}
 
-// Event listener for the drag leave event
-parent.addEventListener("dragleave", (event) => {
-  event.preventDefault();
-  if (event.target.classList.contains("image")) {
-    event.target.classList.remove("selected");
-  }
-});
 
-// Event listener for the drop event
-parent.addEventListener("drop", (event) => {
-  event.preventDefault();
-  if (event.target.classList.contains("image")) {
-    event.target.insertAdjacentHTML("beforebegin", selected.outerHTML);
-    selected.remove();
-    event.target.classList.remove("selected");
-  }
-});
+
+function doDrag(){
+  images.forEach((item)=>{
+    item.addEventListener('dragstart',handleDragStart)
+    item.addEventListener('dragover',handleDragOver)
+    item.addEventListener('drop',handleDrop)
+  })
+}
+
+
+doDrag()
